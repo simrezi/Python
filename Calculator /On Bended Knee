@@ -1,0 +1,166 @@
+import tkinter as tk
+
+# ---------- Window ----------
+root = tk.Tk()
+root.title("Calculator")
+root.geometry("400x600")
+root.configure(bg="#141414")
+root.resizable(False, False)
+
+expression = ""
+
+# ---------- Display ----------
+display = tk.Entry(
+    root,
+    font=("Arial", 22, "bold"),
+    bg="#323131",
+    fg="white",
+    bd=0,
+    justify="right",
+    insertbackground="white"
+)
+display.pack(padx=20, pady=20, fill="x", ipady=20)
+
+# ---------- Functions ----------
+def update_display():
+    display.delete(0, tk.END)
+    display.insert(tk.END, expression)
+
+def append_given(value):
+    global expression
+    expression += str(value)
+    update_display()
+
+def clear_display():
+    global expression
+    expression = ""
+    display.config(justify="right", font=("Arial", 22, "bold"))
+    update_display()
+
+def delete_last():
+    global expression
+    expression = expression[:-1]
+    update_display()
+
+lyrics = [
+    "I'm gonna swallow my pride",
+    "say I'm sorry",
+    "Stop pointing fingers",
+    "the blame is on me",
+    "I want a new life",
+    "and I want it with you",
+    "If you feel the same",
+    "don't ever let it go",
+    "You gotta believe",
+    "in the spirit of love",
+    "It'll heal all things",
+    "it won't hurt anymore",
+    "No, I don't believe",
+    "our love's terminal",
+    "I'm down on my knees",
+    "begging you please",
+    "come home"
+]
+
+times = [3500,6000,8000,10000,12000,14000,16000,18500,21000,22500,24500,26500,29000,30500,32500,34500,36500]
+
+def play_song_with_lyrics():
+    clear_display()
+    display.config(justify="center", font=("Arial", 18, "italic"))
+
+    for text, t in zip(lyrics, times):
+        root.after(t, lambda txt=text: (
+            display.delete(0, tk.END),
+            display.insert(0, txt)
+        ))
+
+def calculate():
+    global expression
+    try:
+        if expression == "67*67":
+            play_song_with_lyrics()
+            expression = ""
+        else:
+            result = str(eval(expression))
+            expression = result
+            update_display()
+    except:
+        display.delete(0, tk.END)
+        display.insert(0, "Error")
+        expression = ""
+
+# ---------- Button Styles ----------
+BTN_BG = "#323131"
+OP_FG = "orange"
+TXT_FG = "white"
+
+def make_button(parent, text, command, operator=False, colspan=1):
+    bg = "orange" if text == "=" else BTN_BG
+    fg = "white" if text == "=" else (OP_FG if operator else TXT_FG)
+
+    btn = tk.Button(
+        parent,
+        text=text,
+        command=command,
+        bg=bg,
+        fg=fg,
+        font=("Arial", 18, "bold"),
+        bd=0,
+        activebackground="#525151",
+        activeforeground="white",
+        relief="flat"
+    )
+    return btn, colspan
+
+# ---------- Buttons Frame ----------
+frame = tk.Frame(root, bg="#141414")
+frame.pack(padx=20, pady=10, fill="both", expand=True)
+
+for i in range(4):
+    frame.columnconfigure(i, weight=1)
+for i in range(5):
+    frame.rowconfigure(i, weight=1)
+
+buttons = [
+    ("AC", clear_display, True),
+    ("DEL", delete_last, True),
+    ("%", lambda: append_given("%"), True),
+    ("/", lambda: append_given("/"), True),
+
+    ("7", lambda: append_given(7), False),
+    ("8", lambda: append_given(8), False),
+    ("9", lambda: append_given(9), False),
+    ("*", lambda: append_given("*"), True),
+
+    ("4", lambda: append_given(4), False),
+    ("5", lambda: append_given(5), False),
+    ("6", lambda: append_given(6), False),
+    ("-", lambda: append_given("-"), True),
+
+    ("1", lambda: append_given(1), False),
+    ("2", lambda: append_given(2), False),
+    ("3", lambda: append_given(3), False),
+    ("+", lambda: append_given("+"), True),
+
+    ("0", lambda: append_given(0), False),
+    (".", lambda: append_given("."), False),
+    ("=", calculate, True)
+]
+
+row = 0
+col = 0
+
+for text, cmd, op in buttons:
+    if text == "=":
+        btn, span = make_button(frame, text, cmd, operator=True, colspan=2)
+        btn.grid(row=row, column=col, columnspan=2, sticky="nsew", padx=5, pady=5, ipady=15)
+        break
+    else:
+        btn, span = make_button(frame, text, cmd, operator=op)
+        btn.grid(row=row, column=col, sticky="nsew", padx=5, pady=5, ipady=15)
+        col += 1
+        if col == 4:
+            col = 0
+            row += 1
+
+root.mainloop()
